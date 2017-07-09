@@ -346,7 +346,7 @@ rm(A2008_IO_RepData.dta, AP2011_IO_RepData.dta, AS2012_IO_RepData.dta,
 
 
 #creating document of variables
-varlist <- as.data.frame(colnames(megadata))
+varlist <- as.data.frame(colnames(MIdataset))
 varlist$VarLocation <- seq(1:nrow(varlist))
 varlist <- varlist[,c(2,1)]
 #WriteXLS(varlist, ExcelFileName = "Variables2.xls")
@@ -354,11 +354,25 @@ varlist <- varlist[,c(2,1)]
 #creating correlation matrix to find like variables
 CorDataset <- MIdataset[, sapply(MIdataset, class) != c("factor")]
 CorDataset <- CorDataset[, sapply(CorDataset, class) != c("character")]
-bob <- t(as.data.frame(lapply(CorDataset, class)))
+#I do not think we need dummies in the correlation matrix. Didn't know how else to drop them.
+Dummies <- list()
+for(i in 1:length(CorDataset)){
+  if(length(unique(CorDataset[,i])) <= 4){
+    Dummies <- c(Dummies, colnames(CorDataset[i]))
+  }
+}
+CorDataset <- CorDataset[ , !(names(CorDataset) %in% Dummies)]
 
 CorMatrix <- cor(CorDataset, use = "pairwise.complete.obs")
 CorMatrix <- as.data.frame(CorMatrix)
-write.csv(CorMatrix, file = "CorMatrix.csv")
+CorMatrixBackup <- CorMatrix
+#write.csv(CorMatrix, file = "CorMatrix.csv")
+
+CorMatrix[lower.tri(CorMatrix,diag=TRUE)] <- NA  #Prepare to drop duplicates and meaningless information
+CorList <- as.data.frame(as.table(as.matrix(CorMatrix)))  #Turn into a 3-column table
+CorList <- na.omit(CorList)  #Get rid of the junk we flagged above
+CorList <- CorList[abs(CorList$Freq) > .95,] #choose level of correlation to keep
+
 
 #second dataset: Vdem, Polity, Haber-Mayer, World Bank
 Vdem <- read.dta13("~/Dropbox/MI paper/MI paper/Country_Year_V-Dem_STATA_v6.2/V-Dem-DS-CY-v6.2.dta")
@@ -393,9 +407,4 @@ PolityIV$ccode[PolityIV$scode == "GMY"] <- Prussia
 CombinedDataSet <- NULL
 CombinedDataSet <- full_join(Vdem, PolityIV, by = c("ccode", "year"), all.x = TRUE, all.y = TRUE) #%>%
   #full_join(., , by = c("ccode", "year"), all.x = TRUE, all.y = TRUE)
-
-
-View(MIdataset[,431:432])
-CorMatrix["oecd", "oecd.x"]
-
 
