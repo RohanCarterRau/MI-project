@@ -9,10 +9,14 @@ library(WriteXLS)
 library(readxl)
 library(foreign)
 
-
-#setwd('./rep. files/TSCS')
+#works but not preferred
+setwd('./raw_data/TSCS')
 temp = list.files(pattern =".dta")
-for (i in 1:length(temp)) assign(temp[i], read.dta13(temp[i], nonint.factors = TRUE, generate.factors = TRUE))
+for (i in 1:length(temp)) assign(temp[i], read.dta13(temp[i]))
+
+#doesn't work?
+#temp = list.files(path = "./raw_data/TSCS", pattern =".dta")
+#for (i in 1:length(temp)) assign(temp[i], read.dta13(temp[i]))
 
 #Country-year data. ccodes = ISO3-Numeric. 
 #Made up iso-3 codes:
@@ -51,8 +55,7 @@ Kosovo <- 1030
 UnitedProvinceCA <- 1040 
 Prussia <- 1041
 
-
-A2008    <- A2008_IO_RepData.dta
+A2008  <- A2008_IO_RepData.dta
 A2008$ccode <- countrycode(A2008$country, "country.name", "iso3n", warn = TRUE)
 #id column
 A2008 <- cbind(A2008 = "A2008", A2008)
@@ -310,50 +313,104 @@ MIdataset$country.x[MIdataset$ccode == "891"] <- "Serbia and Montenegro"
 #WED2011  <- WED2011_WP_RepData.dta
 #WED2011$ccode <- countrycode(WED2011$country, "country.name", "iso3n", warn = TRUE)
 
+
+#getting variable information from stata files
+A2008labs   <- cbind("A2008",  attr(A2008_IO_RepData.dta,  "var.labels"), names(A2008_IO_RepData.dta))
+AS2012labs  <- cbind("AS2012", attr(AS2012_IO_RepData.dta, "var.labels"), names(AS2012_IO_RepData.dta))
+AP2011labs  <- cbind("AP2011", attr(AP2011_IO_RepData.dta, "var.labels"), names(AP2011_IO_RepData.dta))
+B2008labs   <- cbind("B2008",  attr(B2008_WP_RepData.dta,  "var.labels"), names(B2008_WP_RepData.dta))
+BK2012labs  <- cbind("BK2012", attr(BK2012_IO_RepData.dta, "var.labels"), names(BK2012_IO_RepData.dta))
+BR2007labs  <- cbind("BR2007", attr(BR2007_IO_RepData.dta, "var.labels"), names(BR2007_IO_RepData.dta))
+CP2010labs  <- cbind("CP2010", NA, names(CP2010))
+DG2012labs  <- cbind("DG2012", attr(DG2012_IO_RepData.dta, "var.labels"), names(DG2012_IO_RepData.dta))
+E2007labs   <- cbind("E2007",  attr(E2007_IO_RepData.dta,  "var.labels"), names(E2007_IO_RepData.dta))
+GS2010labs  <- cbind("GS2010", attr(GS2010_IO_RepData.dta, "var.labels"), names(GS2010_IO_RepData.dta))
+HHB2010labs <- cbind("HHB2010", attr(HHB2010_IO_RepData.dta, "var.labels"), names(HHB2010_IO_RepData.dta))
+K2007labs   <- cbind("K2007",  attr(K2007_IO_RepData.dta,  "var.labels"), names(K2007_IO_RepData.dta))
+KB2008labs  <- cbind("KB2008", attr(KB2008_WP_RepData.dta, "var.labels"), names(KB2008_WP_RepData.dta))
+KR2008labs  <- cbind("KR2008", attr(KR2008_IO_RepData.dta, "var.labels"), names(KR2008_IO_RepData.dta))
+M2009labs   <- cbind("M2009",  attr(M2009_IO_RepData.dta,  "var.labels"), names(M2009_IO_RepData.dta))
+O2011labs   <- cbind("O2011",  attr(O2011_IO_RepData.dta,  "var.labels"), names(O2011_IO_RepData.dta))
+R2008labs   <- cbind("R2008",  attr(R2008_WP_RepData.dta,  "var.labels"), names(R2008_WP_RepData.dta))
+R2011labs   <- cbind("R2011",  attr(R2011_IO_RepData.dta,  "var.labels"), names(R2011_IO_RepData.dta))
+W2010labs   <- cbind("W2010",  attr(W2010_WP_RepData.dta,  "var.labels"), names(W2010_WP_RepData.dta))
+
+Varinfo <- as.data.frame(rbind(A2008labs,AS2012labs, AP2011labs, B2008labs, BK2012labs, BR2007labs, CP2010labs, 
+                 DG2012labs, E2007labs, GS2010labs, HHB2010labs, K2007labs, KB2008labs, KR2008labs, 
+                 M2009labs, O2011labs, R2008labs, R2011labs, W2010labs))
+#WriteXLS(Varinfo, ExcelFileName = "VariablesDescriptions.xls")
+
+#clearing original files to save RAM
 rm(A2008_IO_RepData.dta, AP2011_IO_RepData.dta, AS2012_IO_RepData.dta, 
-   B2008_WP_RepData.dta , BDMS2009_IO_RepData.dta, BK2012_IO_RepData.dta, BR2007_IO_RepData.dta, 
-   CRA2012_IO_RepData.dta, DG2012_IO_RepData.dta, E2007_IO_RepData.dta , 
-   GKO2009_IO_RepData.dta, GS2010_IO_RepData.dta, HHB2010_IO_RepData.dta, K2007_IO_RepData.dta, 
-   KB2008_WP_RepData.dta, KR2008_IO_RepData.dta, M2009_IO_RepData.dta, O2011_IO_RepData.dta, 
-   R2008_WP_RepData.dta, R2011_IO_RepData.dta, W2010_WP_RepData.dta, WED2011_WP_RepData.dta)
+  B2008_WP_RepData.dta , BDMS2009_IO_RepData.dta, BK2012_IO_RepData.dta, BR2007_IO_RepData.dta, 
+  CRA2012_IO_RepData.dta, DG2012_IO_RepData.dta, E2007_IO_RepData.dta , 
+  GKO2009_IO_RepData.dta, GS2010_IO_RepData.dta, HHB2010_IO_RepData.dta, K2007_IO_RepData.dta, 
+  KB2008_WP_RepData.dta, KR2008_IO_RepData.dta, M2009_IO_RepData.dta, O2011_IO_RepData.dta, 
+  R2008_WP_RepData.dta, R2011_IO_RepData.dta, W2010_WP_RepData.dta, WED2011_WP_RepData.dta)
+
+
+#second dataset: Vdem, Polity, Haber-Mayer, World Bank
+#Vdem <- read.dta13("./Country_Year_V-Dem_STATA_v6.2/V-Dem-DS-CY-v6.2.dta")
+#Vdem$ccode <- countrycode(Vdem$country_name, "country.name", "iso3n", warn = TRUE)
+#Vdem$ccode[Vdem$country_text_id == "VNM"] <- 704 #Vietnam
+#Vdem$ccode[Vdem$country_text_id == "VDR"] <- 714 #South Vietnam
+#Vdem$ccode[Vdem$country_text_id == "XKX"] <- Kosovo
+
+
+#need to deal with factors, don't quite understand problem yet.
+#PolityIV <- read_excel("~/Dropbox/MI paper/MI paper/Polity IV Project.xls")
+#PolityIV$ccode <- countrycode(PolityIV$country, "country.name", "iso3n", warn = TRUE)
+#PolityIV$ccode[PolityIV$scode == "YUG"] <- 890 #Yugoslavia
+#PolityIV$ccode[PolityIV$scode == "YGS"] <- 890 #Yugoslavia
+#PolityIV$ccode[PolityIV$country == "Serbia and Montenegro"] <- 891 #Serbia and montenegro
+#PolityIV$ccode[PolityIV$scode == "YAR"] <- 886 #North Yemen
+#PolityIV$ccode[PolityIV$scode == "WRT"] <- wuttemberg
+#PolityIV$ccode[PolityIV$scode == "TUS"] <- tuscany
+#PolityIV$ccode[PolityIV$scode == "SIC"] <- sicily 
+#PolityIV$ccode[PolityIV$scode == "SAX"] <- saxony
+#PolityIV$ccode[PolityIV$scode == "SAR"] <- sardinia 
+#PolityIV$ccode[PolityIV$scode == "PMA"] <- parma
+#PolityIV$ccode[PolityIV$scode == "OFS"] <- OrangeFreeState
+#PolityIV$ccode[PolityIV$scode == "MOD"] <- modena
+#PolityIV$ccode[PolityIV$scode == "KOS"] <- Kosovo
+#PolityIV$ccode[PolityIV$scode == "BAV"] <- bavaria
+#PolityIV$ccode[PolityIV$scode == "BAD"] <- baden
+#PolityIV$ccode[PolityIV$scode == "UPC"] <- UnitedProvinceCA
+#PolityIV$ccode[PolityIV$scode == "GMY"] <- Prussia
+#
+#
+#CombinedDataSet <- NULL
+#CombinedDataSet <- full_join(Vdem, PolityIV, by = c("ccode", "year"), all.x = TRUE, all.y = TRUE) #%>%
+  #full_join(., , by = c("ccode", "year"), all.x = TRUE, all.y = TRUE)
+
 
 #creating document of variables
-#varlist <- as.data.frame(colnames(megadata))
-#varlist$VarLocation <- seq(1:nrow(varlist))
-#varlist <- varlist[,c(2,1)]
+varlist <- as.data.frame(colnames(MIdataset))
+varlist$VarLocation <- seq(1:nrow(varlist))
+varlist <- varlist[,c(2,1)]
 #WriteXLS(varlist, ExcelFileName = "Variables2.xls")
 
-#second dataset
-Vdem <- read.dta13("~/Dropbox/MI paper/MI paper/Country_Year_V-Dem_STATA_v6.2/V-Dem-DS-CY-v6.2.dta")
-Vdem$ccode <- countrycode(Vdem$country_name, "country.name", "iso3n", warn = TRUE)
-Vdem$ccode[Vdem$country_text_id == "VNM"] <- 704 #Vietnam
-Vdem$ccode[Vdem$country_text_id == "VDR"] <- 714 #South Vietnam
-Vdem$ccode[Vdem$country_text_id == "XKX"] <- Kosovo #South Vietnam
+#creating correlation matrix to find like variables
+CorDataset <- MIdataset[, sapply(MIdataset, class) != c("factor")]
+CorDataset <- CorDataset[, sapply(CorDataset, class) != c("character")]
+#I do not think we need dummies in the correlation matrix. Didn't know how else to drop them.
 
+#na.omit() & change to = 2. We can then use the dummy list to find correlation for these.
+Dummies <- list()
+for(i in 1:length(CorDataset)){
+  if(length(unique(CorDataset[,i])) <= 4){
+    Dummies <- c(Dummies, colnames(CorDataset[i]))
+  }
+}
+CorDataset <- CorDataset[ , !(names(CorDataset) %in% Dummies)]
 
-#need to deal with factors
-PolityIV <- read_excel("~/Dropbox/MI paper/MI paper/Polity IV Project.xls")
-PolityIV$ccode <- countrycode(PolityIV$country, "country.name", "iso3n", warn = TRUE)
-PolityIV$ccode[PolityIV$scode == "YUG"] <- 890 #Yugoslavia
-PolityIV$ccode[PolityIV$scode == "YGS"] <- 890 #Yugoslavia
-PolityIV$ccode[PolityIV$country == "Serbia and Montenegro"] <- 891 #Serbia and montenegro
-PolityIV$ccode[PolityIV$scode == "YAR"] <- 886 #North Yemen
-PolityIV$ccode[PolityIV$scode == "WRT"] <- wuttemberg
-PolityIV$ccode[PolityIV$scode == "TUS"] <- tuscany
-PolityIV$ccode[PolityIV$scode == "SIC"] <- sicily 
-PolityIV$ccode[PolityIV$scode == "SAX"] <- saxony
-PolityIV$ccode[PolityIV$scode == "SAR"] <- sardinia 
-PolityIV$ccode[PolityIV$scode == "PMA"] <- parma
-PolityIV$ccode[PolityIV$scode == "OFS"] <- OrangeFreeState
-PolityIV$ccode[PolityIV$scode == "MOD"] <- modena
-PolityIV$ccode[PolityIV$scode == "KOS"] <- Kosovo
-PolityIV$ccode[PolityIV$scode == "BAV"] <- bavaria
-PolityIV$ccode[PolityIV$scode == "BAD"] <- baden
-PolityIV$ccode[PolityIV$scode == "UPC"] <- UnitedProvinceCA
-PolityIV$ccode[PolityIV$scode == "GMY"] <- Prussia
+CorMatrix <- cor(CorDataset, use = "pairwise.complete.obs")
+CorMatrix <- as.data.frame(CorMatrix)
+CorMatrixBackup <- CorMatrix
+#write.csv(CorMatrix, file = "CorMatrix.csv")
 
-
-CombinedDataSet <- NULL
-CombinedDataSet <- full_join(Vdem, PolityIV, by = c("ccode", "year"), all.x = TRUE, all.y = TRUE) #%>%
-  #full_join(., , by = c("ccode", "year"), all.x = TRUE, all.y = TRUE)
+CorMatrix[lower.tri(CorMatrix,diag=TRUE)] <- NA  #Prepare to drop duplicates and meaningless information
+CorList <- as.data.frame(as.table(as.matrix(CorMatrix)))  #Turn into a 3-column table
+CorList <- na.omit(CorList)  #Get rid of redundant dyads
+CorList <- CorList[abs(CorList$Freq) > .95,] #choose level of correlation to keep
 
