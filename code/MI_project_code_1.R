@@ -395,7 +395,7 @@ CorDataset <- MIdataset[, sapply(MIdataset, class) != c("factor")]
 CorDataset <- CorDataset[, sapply(CorDataset, class) != c("character")]
 #I do not think we need dummies in the correlation matrix. Didn't know how else to drop them.
 
-#na.omit() & change to = 2. We can then use the dummy list to find correlation for these.
+#na.omit() & change to = 3. We can then use the dummy list to find correlation for these.
 Dummies <- list()
 for(i in 1:length(CorDataset)){
   if(length(unique(CorDataset[,i])) <= 4){
