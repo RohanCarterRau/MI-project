@@ -13,6 +13,8 @@ library(foreign)
 setwd('./raw_data/TSCS')
 temp = list.files(pattern =".dta")
 for (i in 1:length(temp)) assign(temp[i], read.dta13(temp[i]))
+setwd('..')
+setwd('..')
 
 #doesn't work?
 #temp = list.files(path = "./raw_data/TSCS", pattern =".dta")
@@ -140,7 +142,7 @@ BR2007$ccode <- countrycode(BR2007$country, "country.name", "iso3n", warn = TRUE
 BR2007 <- cbind(BR2007 = "BR2007", BR2007)
 
 
-CP2010 <- read.delim("CP2010_IO_RepData.tab")
+CP2010 <- read.delim("./raw_data/TSCS/CP2010_IO_RepData.tab")
 CP2010$ccode <- countrycode(CP2010$country, "cowc", "iso3n", warn = FALSE)
 for(i in 1:nrow(CP2010)){
   if(is.na(CP2010[i, "ccode"])){
@@ -273,35 +275,6 @@ W2010$ccode[W2010$NAMES_STD == "Yugoslavia"] <- 890
 #id column
 W2010 <- cbind(W2010 = "W2010", W2010)
 
-#lapply should be able to merge these in a more concise way
-#merging 
-MIdataset <- NULL
-MIdataset <- full_join(A2008, AS2012, by = c("ccode", "year"), all.x = TRUE, all.y = TRUE) %>%
-  full_join(., AP2011, by = c("ccode", "year"), all.x = TRUE, all.y = TRUE) %>%
-  full_join(., B2008, by = c("ccode", "year"), all.x = TRUE, all.y = TRUE) %>%
-  full_join(., BK2012, by = c("ccode", "year"), all.x = TRUE, all.y = TRUE) %>%
-  full_join(., BR2007, by = c("ccode", "year"), all.x = TRUE, all.y = TRUE) %>%
-  full_join(., CP2010, by = c("ccode", "year"), all.x = TRUE, all.y = TRUE) %>% 
-  full_join(., DG2012, by = c("ccode", "year"), all.x = TRUE, all.y = TRUE) %>%
-  full_join(., E2007, by = c("ccode", "year"), all.x = TRUE, all.y = TRUE) %>%
-  full_join(., GS2010, by = c("ccode", "year"), all.x = TRUE, all.y = TRUE) %>%
-  full_join(., HHB2010, by = c("ccode", "year"), all.x = TRUE, all.y = TRUE) %>%
-  full_join(., K2007, by = c("ccode", "year"), all.x = TRUE, all.y = TRUE) %>%
-  full_join(., KB2008, by = c("ccode", "year"), all.x = TRUE, all.y = TRUE) %>%
-  full_join(., KR2008, by = c("ccode", "year"), all.x = TRUE, all.y = TRUE) %>%
-  full_join(., M2009, by = c("ccode", "year"), all.x = TRUE, all.y = TRUE) %>%
-  full_join(., O2011, by = c("ccode", "year"), all.x = TRUE, all.y = TRUE) %>%
-  full_join(., R2008, by = c("ccode", "year"), all.x = TRUE, all.y = TRUE) %>%
-  full_join(., R2011, by = c("ccode", "year"), all.x = TRUE, all.y = TRUE) %>%
-  full_join(., W2010, by = c("ccode", "year"), all.x = TRUE, all.y = TRUE) #%>%
-#full_join(., CRA2012, by = c("ccode", "year"), all.x = TRUE, all.y = TRUE) #Still needs ISO3 codes.
-
-MIdataset$country.x <- countrycode(MIdataset$ccode, "iso3n", "country.name", warn = TRUE)
-MIdataset$country.x[MIdataset$ccode == "890"] <- "Yugoslavia"
-MIdataset$country.x[MIdataset$ccode == EU] <- "European Union"
-MIdataset$country.x[MIdataset$ccode == "830"] <- "Channel Islands"
-MIdataset$country.x[MIdataset$ccode == "886"] <- "Yemen Arab Republic"
-MIdataset$country.x[MIdataset$ccode == "891"] <- "Serbia and Montenegro"
 
 #dyad year data structure - not sure how to merge.
 #AF2008 <- read.delim("AF2008_WP_RepData.tab")
@@ -350,67 +323,123 @@ rm(A2008_IO_RepData.dta, AP2011_IO_RepData.dta, AS2012_IO_RepData.dta,
 
 
 #second dataset: Vdem, Polity, Haber-Mayer, World Bank
-#Vdem <- read.dta13("./Country_Year_V-Dem_STATA_v6.2/V-Dem-DS-CY-v6.2.dta")
-#Vdem$ccode <- countrycode(Vdem$country_name, "country.name", "iso3n", warn = TRUE)
-#Vdem$ccode[Vdem$country_text_id == "VNM"] <- 704 #Vietnam
-#Vdem$ccode[Vdem$country_text_id == "VDR"] <- 714 #South Vietnam
-#Vdem$ccode[Vdem$country_text_id == "XKX"] <- Kosovo
+Vdem <- read.dta13("./raw_data/V-Dem_STATA_v6.2/V-Dem-DS-CY-v6.2.dta")
+Vdem$ccode <- countrycode(Vdem$country_name, "country.name", "iso3n", warn = TRUE)
+Vdem$ccode[Vdem$country_text_id == "VNM"] <- 704 #Vietnam
+Vdem$ccode[Vdem$country_text_id == "VDR"] <- 714 #South Vietnam
+Vdem$ccode[Vdem$country_text_id == "XKX"] <- Kosovo
+Vdem <- cbind(Vdem = "Vdem", Vdem)
+
+HaberMenaldo <- read_excel("./raw_data/Haber_Menaldo_2011.xls", sheet = 2)
+HaberMenaldo$ccode <- countrycode(HaberMenaldo$cnamehabmen, "country.name", "iso3n", warn = TRUE)
+HaberMenaldo$ccode[HaberMenaldo$cnamehabmen == "Yugoslavia"] <- 890
+HaberMenaldo$ccode[HaberMenaldo$cnamehabmen == "Pakisan"] <- 586
+HaberMenaldo <- HaberMenaldo[!(is.na(HaberMenaldo$cnamehabmen)),]
+HaberMenaldo <- cbind(HaberMenaldo = "HaberMenaldo", HaberMenaldo)
+
+PolityIV <- read_excel("./raw_data/Polity IV Project.xls")
+PolityIV$ccode <- countrycode(PolityIV$country, "country.name", "iso3n", warn = TRUE)
+PolityIV$ccode[PolityIV$scode == "YUG"] <- 890 #Yugoslavia
+PolityIV$ccode[PolityIV$scode == "YGS"] <- 890 #Yugoslavia
+PolityIV$ccode[PolityIV$country == "Serbia and Montenegro"] <- 891 #Serbia and montenegro
+PolityIV$ccode[PolityIV$scode == "YAR"] <- 886 #North Yemen
+PolityIV$ccode[PolityIV$scode == "WRT"] <- wuttemberg
+PolityIV$ccode[PolityIV$scode == "TUS"] <- tuscany
+PolityIV$ccode[PolityIV$scode == "SIC"] <- sicily 
+PolityIV$ccode[PolityIV$scode == "SAX"] <- saxony
+PolityIV$ccode[PolityIV$scode == "SAR"] <- sardinia 
+PolityIV$ccode[PolityIV$scode == "PMA"] <- parma
+PolityIV$ccode[PolityIV$scode == "OFS"] <- OrangeFreeState
+PolityIV$ccode[PolityIV$scode == "MOD"] <- modena
+PolityIV$ccode[PolityIV$scode == "KOS"] <- Kosovo
+PolityIV$ccode[PolityIV$scode == "BAV"] <- bavaria
+PolityIV$ccode[PolityIV$scode == "BAD"] <- baden
+PolityIV$ccode[PolityIV$scode == "UPC"] <- UnitedProvinceCA
+PolityIV$ccode[PolityIV$scode == "GMY"] <- Prussia
+PolityIV <- cbind(PolityIV = "PolityIV", PolityIV)
+
+#WorldBank
 
 
-#need to deal with factors, don't quite understand problem yet.
-#PolityIV <- read_excel("~/Dropbox/MI paper/MI paper/Polity IV Project.xls")
-#PolityIV$ccode <- countrycode(PolityIV$country, "country.name", "iso3n", warn = TRUE)
-#PolityIV$ccode[PolityIV$scode == "YUG"] <- 890 #Yugoslavia
-#PolityIV$ccode[PolityIV$scode == "YGS"] <- 890 #Yugoslavia
-#PolityIV$ccode[PolityIV$country == "Serbia and Montenegro"] <- 891 #Serbia and montenegro
-#PolityIV$ccode[PolityIV$scode == "YAR"] <- 886 #North Yemen
-#PolityIV$ccode[PolityIV$scode == "WRT"] <- wuttemberg
-#PolityIV$ccode[PolityIV$scode == "TUS"] <- tuscany
-#PolityIV$ccode[PolityIV$scode == "SIC"] <- sicily 
-#PolityIV$ccode[PolityIV$scode == "SAX"] <- saxony
-#PolityIV$ccode[PolityIV$scode == "SAR"] <- sardinia 
-#PolityIV$ccode[PolityIV$scode == "PMA"] <- parma
-#PolityIV$ccode[PolityIV$scode == "OFS"] <- OrangeFreeState
-#PolityIV$ccode[PolityIV$scode == "MOD"] <- modena
-#PolityIV$ccode[PolityIV$scode == "KOS"] <- Kosovo
-#PolityIV$ccode[PolityIV$scode == "BAV"] <- bavaria
-#PolityIV$ccode[PolityIV$scode == "BAD"] <- baden
-#PolityIV$ccode[PolityIV$scode == "UPC"] <- UnitedProvinceCA
-#PolityIV$ccode[PolityIV$scode == "GMY"] <- Prussia
-#
-#
-#CombinedDataSet <- NULL
-#CombinedDataSet <- full_join(Vdem, PolityIV, by = c("ccode", "year"), all.x = TRUE, all.y = TRUE) #%>%
-  #full_join(., , by = c("ccode", "year"), all.x = TRUE, all.y = TRUE)
+#use to replace above full_joins with more concise method.
+ToMerge <- list(A2008, AS2012, AP2011, B2008, BK2012, BR2007, CP2010, DG2012, 
+                E2007,  GS2010, HHB2010, K2007,  KB2008, KR2008, M2009,  O2011,  
+                R2008,  R2011,  W2010, Vdem, HaberMenaldo, PolityIV)
+#merge datasets
+#need to use reduce and 
+MergeFromList <- function(List){
+  for(i in 2:length(ToMerge)){
+    List[[1]] <- full_join(List[[1]], List[[i]], by = c("ccode", "year"), all.x = TRUE, all.y = TRUE)
+  }
+  return(List[[1]])
+}
+MIDataset <- MergeFromList(ToMerge)
 
+#giving MIDataset a complete list country name column.
+MIdataset$country.x <- countrycode(MIdataset$ccode, "iso3n", "country.name", warn = TRUE)
+MIdataset$country.x[MIdataset$ccode == "890"] <- "Yugoslavia"
+MIdataset$country.x[MIdataset$ccode == EU] <- "European Union"
+MIdataset$country.x[MIdataset$ccode == "830"] <- "Channel Islands"
+MIdataset$country.x[MIdataset$ccode == "886"] <- "Yemen Arab Republic"
+MIdataset$country.x[MIdataset$ccode == "891"] <- "Serbia and Montenegro"
 
-#creating document of variables
-varlist <- as.data.frame(colnames(MIdataset))
-varlist$VarLocation <- seq(1:nrow(varlist))
-varlist <- varlist[,c(2,1)]
-#WriteXLS(varlist, ExcelFileName = "Variables2.xls")
+#find the years each dataset covers
+Year.Range <- function(df){
+  year.max <- max(df$year, na.rm = TRUE)
+  year.min <- min(df$year, na.rm = TRUE)
+  c(year.min, year.max)
+}
 
-#creating correlation matrix to find like variables
+YearsCovered <- lapply(ToMerge, Year.Range)
+
+#creating datasets to use for correlation matrices.
 CorDataset <- MIdataset[, sapply(MIdataset, class) != c("factor")]
 CorDataset <- CorDataset[, sapply(CorDataset, class) != c("character")]
-#I do not think we need dummies in the correlation matrix. Didn't know how else to drop them.
 
-#na.omit() & change to = 3. We can then use the dummy list to find correlation for these.
 Dummies <- list()
 for(i in 1:length(CorDataset)){
-  if(length(unique(CorDataset[,i])) <= 4){
+  if(length(unique(na.omit(CorDataset[,i]))) == 2){
     Dummies <- c(Dummies, colnames(CorDataset[i]))
   }
 }
+#change 10 to whatever we decide to use as determinant of categorical
+Categoricals <- list()
+for(i in 1:length(CorDataset)){
+  if(length(unique(na.omit(CorDataset[,i]))) > 2 & length(unique(na.omit(CorDataset[,i]))) < 10){
+    Categoricals <- c(Categoricals, colnames(CorDataset[i]))
+  }
+}
+DummyCorData <- CorDataset[, (names(CorDataset) %in% Dummies)]
+CategoricalCorData <- CorDataset[, (names(CorDataset) %in% Categoricals)]
 CorDataset <- CorDataset[ , !(names(CorDataset) %in% Dummies)]
 
+#Creating the matrices
 CorMatrix <- cor(CorDataset, use = "pairwise.complete.obs")
 CorMatrix <- as.data.frame(CorMatrix)
 CorMatrixBackup <- CorMatrix
-#write.csv(CorMatrix, file = "CorMatrix.csv")
 
 CorMatrix[lower.tri(CorMatrix,diag=TRUE)] <- NA  #Prepare to drop duplicates and meaningless information
 CorList <- as.data.frame(as.table(as.matrix(CorMatrix)))  #Turn into a 3-column table
 CorList <- na.omit(CorList)  #Get rid of redundant dyads
 CorList <- CorList[abs(CorList$Freq) > .95,] #choose level of correlation to keep
 
+#create correlation matrix for categorical data. Using Kendall method.
+#CategoricalCorMatrix <- cor(CategoricalCorData, method = "kendall", use = "pairwise.complete.obs")
+#CategoricalCorMatrix <- as.data.frame(CategoricalCorMatrix)
+#CategoricalCorMatrixBackup <- CategoricalCorMatrix
+#
+#CategoricalCorMatrix[lower.tri(CategoricalCorMatrix,diag=TRUE)] <- NA  #Prepare to drop duplicates and meaningless information
+#CategoricalCorList <- as.data.frame(as.table(as.matrix(CategoricalCorMatrix)))  #Turn into a 3-column table
+#CategoricalCorList <- na.omit(CategoricalCorList)  #Get rid of redundant dyads
+#CategoricalCorList <- CategoricalCorList[abs(CategoricalCorList$Freq) > .95,]
+
+##create correlation matrix for dummy data - this is using pearson method
+##I currently have the understand that it will return the phi coefficient.
+#DummyCorMatrix <- cor(DummyCorData,use = "pairwise.complete.obs")
+#DummyCorMatrix <- as.data.frame(DummyCorMatrix)
+#DummyCorMatrixBackup <- DummyCorMatrix
+#
+#DummyCorMatrix[lower.tri(DummyCorMatrix,diag=TRUE)] <- NA  #Prepare to drop duplicates and meaningless information
+#DummyCorList <- as.data.frame(as.table(as.matrix(DummyCorMatrix)))  #Turn into a 3-column table
+#DummyCorList <- na.omit(DummyCorList)  #Get rid of redundant dyads
+#DummyCorList <- DummyCorList[abs(DummyCorList$Freq) > .95,]
